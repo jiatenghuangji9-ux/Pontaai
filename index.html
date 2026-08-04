@@ -3,78 +3,126 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ponta AI</title>
+<title>PontaAI</title>
+
 <style>
 body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#111827;
-    color:white;
+  margin:0;
+  background:#0f172a;
+  color:white;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 }
 header{
-    background:#1f2937;
-    padding:15px;
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
+  background:#1e293b;
+  padding:16px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
 }
 #chat{
-    height:70vh;
-    padding:15px;
-    overflow-y:auto;
+  height:70vh;
+  overflow:auto;
+  padding:16px;
 }
-.message{
-    background:#374151;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:10px;
+.msg{
+  margin:12px 0;
+  padding:12px;
+  border-radius:12px;
+}
+.user{
+  background:#2563eb;
+}
+.ai{
+  background:#334155;
 }
 footer{
-    display:flex;
-    padding:10px;
-    background:#1f2937;
+  display:flex;
+  gap:8px;
+  padding:12px;
 }
 input{
-    flex:1;
-    padding:10px;
-    border:none;
-    border-radius:8px;
+  flex:1;
+  padding:12px;
+  border:none;
+  border-radius:10px;
 }
 button{
-    margin-left:10px;
-    padding:10px 20px;
-    border:none;
-    border-radius:8px;
+  padding:12px 18px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+  font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
-<header>Ponta AI</header>
+<header>PontaAI 🤖</header>
 
-<div id="chat">
-    <div class="message">こんにちは！Ponta AIへようこそ！</div>
-</div>
+<div id="chat"></div>
 
 <footer>
-    <input id="text" placeholder="メッセージを入力">
-    <button onclick="send()">送信</button>
+<input id="message" placeholder="メッセージを入力">
+<button onclick="send()">送信</button>
 </footer>
 
 <script>
-function send(){
-    let input=document.getElementById("text");
-    let chat=document.getElementById("chat");
+   const chat = document.getElementById("chat");
 
-    if(input.value==="") return;
-
-    chat.innerHTML += `<div class="message"><b>あなた:</b> ${input.value}</div>`;
-    chat.innerHTML += `<div class="message"><b>Ponta AI:</b> まだ開発中です😊</div>`;
-
-    input.value="";
-    chat.scrollTop=chat.scrollHeight;
+function add(text,type){
+  const div=document.createElement("div");
+  div.className="msg "+type;
+  div.textContent=text;
+  chat.appendChild(div);
+  chat.scrollTop=chat.scrollHeight;
 }
-</script>
+
+async function send(){
+
+  const input=document.getElementById("message");
+  const text=input.value.trim();
+
+  if(!text)return;
+
+  add(text,"user");
+  input.value="";
+
+  add("考え中...","ai");
+
+  const loading=chat.lastChild;
+
+  try{
+
+    const res=await fetch("https://hidden-lake-a315.jiatenghuangji9.workers.dev",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        message:text
+      })
+    });
+
+    const data=await res.json();
+
+    let reply="返答を取得できませんでした";
+
+    if(data.candidates){
+      reply=data.candidates[0].content.parts[0].text;
+    }
+
+    loading.textContent=reply;
+
+  }catch(e){
+
+    loading.textContent="エラー："+e.message;
+
+  }
+
+}
+ </script>
 
 </body>
-</html>
+</html>   
